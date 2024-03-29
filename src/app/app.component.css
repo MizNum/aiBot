@@ -1,0 +1,40 @@
+.header{
+  display: flex;
+  justify-content: center;
+  background-color: white;
+  z-index: 2;
+  margin-bottom: 20px;
+}
+.main-content{
+  position: relative;
+  margin-bottom: 20px;
+}
+.bg-image{
+    width: 100%;
+    background-size: cover;
+    animation: fade 5s ease-in-out infinite alternate;
+}
+  
+  @keyframes fade {
+    from { opacity: 0.3; }
+    to { opacity: 1; }
+  }
+  
+  .content{
+    display: flex;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+  }
+  .footer-container{
+    position: relative;
+    width: 100%;
+    border: 2px solid rgb(255,255,255,0.5);
+    color: white;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  

@@ -1,0 +1,22 @@
+.main-container{
+    display: flex;
+    justify-content: center;
+}
+.form-container{
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    background-color: rgb(255,255,255,0.9);
+    border-radius: 15px;
+    padding: 10%
+}
+.field{
+    height: 40px;
+    margin-bottom: 10px;
+    outline: none;
+    border: none;
+}
+.form-title{
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
