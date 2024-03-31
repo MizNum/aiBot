@@ -1,9 +1,49 @@
 <div class="main-container">
-    <div class="form-container">
-        <div class="form-title">LOGIN</div>
-        <input class="field" type="text" placeholder="Enter Email">
-        <button class="field" >VERIFY</button>
-        <input class="field" type="text"  placeholder="Enter OTP">
-        <button class="field" >LOGIN</button>
+
+
+    <div *ngIf="loginPage" class="form-container">
+        <div class="form-title">
+            <span class="form-tag selected">
+                <span>LOGIN</span>
+                <span class="ruler"></span>
+            </span>
+            <!-- <span class="vertical-ruler"></span> -->
+            <span class="form-tag selected" (click)="onSingnUp()">
+                <span>SIGNUP</span>
+            </span>
+
+        </div>
+        <input class="field input-class" type="text" placeholder="Enter Email">
+
+        <button (click)="sendOtp()" class="field btn" >SEND OTP</button>
+
+        <div *ngIf="otpSent" class="verify-container">
+            <input class="field input-class" type="text" placeholder="Enter OTP">
+            <button class="field btn" (click)="openHome()">LOGIN</button>
+        </div>
+    </div>
+
+    <div *ngIf="!loginPage" class="form-container">
+        <div class="form-title">
+            <span class="form-tag selected" (click)="onSingnUp()">
+                <span>LOGIN</span>
+            </span>
+
+            <span class="form-tag selected">
+                <span>SIGNUP</span>
+                <span class="ruler"></span>
+            </span>
+
+        </div>
+
+        <input class="field input-class" type="text" placeholder="Enter Name">
+        <input class="field input-class" type="text" placeholder="Enter Email">
+
+        <button (click)="sendOtp()" class="field btn">SEND OTP</button>
+
+        <div *ngIf="otpSent" class="verify-container">
+            <input class="field input-class" type="text" placeholder="Enter OTP">
+            <button class="field btn">SIGNUP</button>
+        </div>
     </div>
 </div>
