@@ -16,6 +16,8 @@
         <input class="field input-class" type="text" placeholder="Enter Email">
 
         <button (click)="sendOtp()" class="field btn" >SEND OTP</button>
+        <app-toast *ngIf="otpSent" [showToast]="true" [bgColor]="'#A7CD74'" [message]="'Otp has been generated successfully.'"></app-toast>
+        
 
         <div *ngIf="otpSent" class="verify-container">
             <input class="field input-class" type="text" placeholder="Enter OTP">

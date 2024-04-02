@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
+import { ToastComponent } from '../toast/toast.component';
 
 @Component({
   selector: 'app-login',
@@ -10,7 +11,8 @@ import { Router } from '@angular/router';
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink
+    RouterLink,
+    ToastComponent
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
