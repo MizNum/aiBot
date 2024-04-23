@@ -52,7 +52,7 @@
     outline: none;
     border: none;
     border-radius: 2px;
-    font-size: 1.1;
+    font-size: 0.9rem;
     color: #005694;
     margin-bottom: 30px;
 }
@@ -66,6 +66,9 @@
 .btn:hover{
     background-color: #A7CD74;
 }
+.btn:disabled{
+    opacity: 0.65;
+}
 .input-class{
     background-color: whitesmoke;
     padding: 0px 15px;
@@ -73,4 +76,20 @@
 .verify-container{
     display: flex;
     flex-direction: column;
+}
+.warning{
+    display: flex;
+    justify-content: space-between;
+    background-color: whitesmoke;
+    margin-bottom: 30px;
+    
+}
+.sign{
+    height: 50px;
+    align-content: center;
+    padding: 0px 10px;
+}
+.width-90{
+    width: 90%;
+    margin-bottom: 0;
 }

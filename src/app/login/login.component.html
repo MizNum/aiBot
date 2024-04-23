@@ -11,16 +11,24 @@
             <span class="form-tag selected" (click)="onSingnUp()">
                 <span>SIGNUP</span>
             </span>
-
         </div>
-        <input class="field input-class" type="text" placeholder="Enter Email">
+        <div class="warning">
+            
+            <input (keyup)="emailCheck()" class="field input-class width-90" type="text" placeholder="Enter Email" [(ngModel)] ="email">
+            <span class="sign">
+                <img *ngIf="!mailValid && show" src="../../assets/images/warning_FILL0_wght400_GRAD0_opsz24.svg" alt="Warning Icon" width="24px" title="Only University mail of the form  email@th-bingen.de/ email@stud.th-bingen.de is allowed.">
+                <ng-container *ngIf="mailValid && show">
+                  <img src="../../assets/images/check_circle_FILL0_wght400_GRAD0_opsz24.svg" alt="Check Icon" width="24px" title="Valid Email">
+                </ng-container>
+              </span>
+              
+        </div>
+        <button [disabled]="!mailValid" (click)="sendOtp()" class="field btn" >SEND OTP</button>
 
-        <button (click)="sendOtp()" class="field btn" >SEND OTP</button>
-        <app-toast *ngIf="otpSent" [showToast]="true" [bgColor]="'#A7CD74'" [message]="'Otp has been generated successfully.'"></app-toast>
         
 
         <div *ngIf="otpSent" class="verify-container">
-            <input class="field input-class" type="text" placeholder="Enter OTP">
+            <input class="field input-class" type="text" placeholder="Enter OTP" [(ngModel)]="code">
             <button class="field btn" (click)="openHome()">LOGIN</button>
         </div>
     </div>
