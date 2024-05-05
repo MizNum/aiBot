@@ -3,7 +3,6 @@ import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
-import { ToastComponent } from '../toast/toast.component';
 import { MailService } from '../mail.service';
 
 @Component({
@@ -12,8 +11,7 @@ import { MailService } from '../mail.service';
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
-    ToastComponent
+    RouterLink
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
@@ -31,9 +29,13 @@ export class LoginComponent{
   recievedCode = '';
   loginPage = true;
   otpSent = false;
-  otp ='';
+  otp! :any;
   mailValid = false;
   show = false;
+
+
+
+
 
   emailCheck() {
     this.show = true;
@@ -69,7 +71,7 @@ export class LoginComponent{
   }
 
   openHome() {
-    console.log("Otp sent is ",this.code, " and the recieved code is ", this.code);
+    console.log("Otp sent is ",this.otp, " and the recieved code is ", this.code);
     if (this.code === this.otp) {
       this.router.navigate(['/home']);
     }
@@ -79,9 +81,9 @@ export class LoginComponent{
   }
 
   //on send otp a mail to be sent to required witht a 6 digit otp
-  sendOtp() {
+  async sendOtp() {
     //sendOtp
-    this.otp = this.mailService.generateOtp();
+    this.otp =await this.mailService.generateOtp(this.email);
     this.otpSent = true;
   }
 
