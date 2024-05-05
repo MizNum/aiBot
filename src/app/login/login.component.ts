@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { MailService } from '../mail.service';
+import { PopupService } from '../popup.service';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ export class LoginComponent{
 
   constructor(
     private router: Router,
-    private mailService : MailService
+    private mailService : MailService,
+    private popUpService : PopupService
   ) { }
 
 
@@ -32,6 +34,7 @@ export class LoginComponent{
   otp! :any;
   mailValid = false;
   show = false;
+  timer = true;
 
 
 
@@ -76,15 +79,18 @@ export class LoginComponent{
       this.router.navigate(['/home']);
     }
     else {
-      //notify by popUP that opt is not verified try again
+      this.popUpService.toast('OTP is not verfied. Please try again.','Dismiss')
     }
   }
 
   //on send otp a mail to be sent to required witht a 6 digit otp
   async sendOtp() {
     //sendOtp
+    
     this.otp =await this.mailService.generateOtp(this.email);
-    this.otpSent = true;
+    if(this.otp!==undefined){
+        this.otpSent = true;
+    }
   }
 
   onSingnUp() {

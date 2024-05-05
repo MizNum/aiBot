@@ -23,7 +23,7 @@
               </span>
               
         </div>
-        <button [disabled]="!mailValid" (click)="sendOtp()" class="field btn" >SEND OTP</button>
+        <button [disabled]="!mailValid && timer" (click)="sendOtp()" class="field btn" >SEND OTP</button>
 
         
 

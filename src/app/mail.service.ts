@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Environment } from './environment';
 import axios, { Axios } from 'axios';
+import { PopupService } from './popup.service';
 
 
 @Injectable({
@@ -8,7 +9,7 @@ import axios, { Axios } from 'axios';
 })
 export class MailService {
 
-  constructor() { }
+  constructor( private popUpService :PopupService) { }
 
   async generateOtp(email: string): Promise<string | undefined> {
     const apiUrl = Environment.sendOtpUrl;
@@ -17,12 +18,12 @@ export class MailService {
     try {
       const response = await axios.post(apiUrl, data);
       const otp = response.data.Otp?.toString();
-       // Log the generated OTP (if successful)
-      console.log('Otp is ',otp);
+      this.popUpService.toast('OTP has been sent Successfully.','Dismiss');
+      console.log('OTP sent is ',otp);
       return otp;
     } catch (error) {
-      console.error('Error generating OTP:', error);
-      // Handle the error appropriately (e.g., display an error message to the user)
+      // console.error('Error generating OTP:', error);
+      this.popUpService.toast('OTP not sent, Please try again later.','Dismiss');  
       return undefined; // Indicate failure (optional)
     }
   }
