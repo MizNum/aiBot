@@ -17,12 +17,12 @@ import { PopupService } from '../popup.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent{
+export class LoginComponent {
 
   constructor(
     private router: Router,
-    private mailService : MailService,
-    private popUpService : PopupService
+    private mailService: MailService,
+    private popUpService: PopupService
   ) { }
 
 
@@ -31,21 +31,16 @@ export class LoginComponent{
   recievedCode = '';
   loginPage = true;
   otpSent = false;
-  otp! :any;
+  otp!: any;
   mailValid = false;
   show = false;
   timer = true;
-
-
-
 
 
   emailCheck() {
     this.show = true;
     this.checkValidity(this.email);
   }
-
-
 
 
   checkValidity(email: string) {
@@ -73,23 +68,24 @@ export class LoginComponent{
 
   }
 
+
   openHome() {
-    console.log("Otp sent is ",this.otp, " and the recieved code is ", this.code);
+    console.log("Otp sent is ", this.otp, " and the recieved code is ", this.code);
     if (this.code === this.otp) {
       this.router.navigate(['/home']);
     }
     else {
-      this.popUpService.toast('OTP is not verfied. Please try again.','Dismiss')
+      this.popUpService.toast('OTP is not verfied. Please try again.', 'Dismiss')
     }
   }
 
   //on send otp a mail to be sent to required witht a 6 digit otp
   async sendOtp() {
     //sendOtp
-    
-    this.otp =await this.mailService.generateOtp(this.email);
-    if(this.otp!==undefined){
-        this.otpSent = true;
+
+    this.otp = await this.mailService.generateOtp(this.email);
+    if (this.otp !== undefined) {
+      this.otpSent = true;
     }
   }
 

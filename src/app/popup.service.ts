@@ -8,10 +8,18 @@ import { MatSnackBarConfig } from '@angular/material/snack-bar';
 })
 export class PopupService {
 
+  private defaultSnackBarConfig: MatSnackBarConfig = {
+    duration: 5000,
+    horizontalPosition: 'right',
+    verticalPosition: 'top',
+  };
+
+
   constructor(private snackBar : MatSnackBar
   ) { }
 
+
   toast(message: string, action?: string, config?: MatSnackBarConfig<any>) {
-    this.snackBar.open(message, action, config);
+    this.snackBar.open(message, action, this.defaultSnackBarConfig);
 }
 }
