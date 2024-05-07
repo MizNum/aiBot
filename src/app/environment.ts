@@ -1,5 +1,6 @@
 export const Environment = {
-    servicePort:'http://localhost:3000/sendOtp',
-    sendOtpUrl:'http://localhost:3000/sendOtp'
+    SERVICE_PORT:'http://localhost:3000/sendOtp',
+    SEND_OTP_API:'http://localhost:3000/sendOtp',
+    RESPONSE_API:'http://localhost:3000/response'
 }
 

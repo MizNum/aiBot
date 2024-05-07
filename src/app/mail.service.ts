@@ -12,8 +12,8 @@ export class MailService {
   constructor( private popUpService :PopupService) { }
 
   async generateOtp(email: string): Promise<string | undefined> {
-    const apiUrl = Environment.sendOtpUrl;
-    const data = { email };
+    const apiUrl = Environment.SEND_OTP_API;
+    const data = {"email" : email };
 
     try {
       const response = await axios.post(apiUrl, data);
@@ -22,9 +22,9 @@ export class MailService {
       console.log('OTP sent is ',otp);
       return otp;
     } catch (error) {
-      // console.error('Error generating OTP:', error);
+      
       this.popUpService.toast('OTP not sent, Please try again later.','Dismiss');  
-      return undefined; // Indicate failure (optional)
+      return undefined; 
     }
   }
 }

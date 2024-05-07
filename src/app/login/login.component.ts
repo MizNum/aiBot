@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { MailService } from '../mail.service';
 import { PopupService } from '../popup.service';
+import { count } from 'console';
 
 @Component({
   selector: 'app-login',
@@ -33,12 +34,12 @@ export class LoginComponent {
   otpSent = false;
   otp!: any;
   mailValid = false;
-  show = false;
-  timer = true;
+  showWarning = false;
+  timer = false;
 
 
   emailCheck() {
-    this.show = true;
+    this.showWarning = true;
     this.checkValidity(this.email);
   }
 
@@ -46,7 +47,7 @@ export class LoginComponent {
   checkValidity(email: string) {
 
     if (email === '') {
-      this.show = false
+      this.showWarning = false
     }
 
     // Explanation for reference 
@@ -79,15 +80,18 @@ export class LoginComponent {
     }
   }
 
-  //on send otp a mail to be sent to required witht a 6 digit otp
+  
   async sendOtp() {
-    //sendOtp
-
+    this.timer = true;
+    setTimeout(() => {
+      this.timer = false;
+    }, 10000);
     this.otp = await this.mailService.generateOtp(this.email);
     if (this.otp !== undefined) {
       this.otpSent = true;
     }
   }
+
 
   onSingnUp() {
     this.loginPage = !this.loginPage;

@@ -10,7 +10,7 @@ export class PopupService {
 
   private defaultSnackBarConfig: MatSnackBarConfig = {
     duration: 5000,
-    horizontalPosition: 'right',
+    horizontalPosition: 'center',
     verticalPosition: 'top',
   };
 
