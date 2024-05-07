@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Router } from '@angular/router';
+import { Router,NavigationExtras} from '@angular/router';
 import { MailService } from '../mail.service';
 import { PopupService } from '../popup.service';
 import { count } from 'console';
@@ -36,6 +36,7 @@ export class LoginComponent {
   mailValid = false;
   showWarning = false;
   timer = false;
+  session = false;
 
 
   emailCheck() {
@@ -73,6 +74,8 @@ export class LoginComponent {
   openHome() {
     console.log("Otp sent is ", this.otp, " and the recieved code is ", this.code);
     if (this.code === this.otp) {
+      this.session = true;
+      // sessionStorage.setItem('session','true');
       this.router.navigate(['/home']);
     }
     else {
