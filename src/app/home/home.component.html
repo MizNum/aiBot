@@ -1,42 +1,55 @@
 <div class="home">
-    <div class="home-container">
-        <div class="content">
-            <div class="content-head">
-                <div class="head-title">
-                    <span class="title">Ai Bot</span>
-                </div>
-                <div class='ruler'>
-                    <span class="horizontal-ruler"></span>
-                </div>
-            </div>
-            <div class="content-chat-screen" #chatContainer >
-                <div class="chat" *ngFor="let data of conversation ">
-                  <ng-container *ngIf="data.type === 'text'">
-                    <span class="msg-user">{{ data.content }}</span>
-                  </ng-container>
-                  <ng-container *ngIf="data.type === 'voicenote'">
-                    <span class="msg-user">[Voice Note: Click to listen]</span>
-                    <audio controls>
-                      <source [src]="data.audio_url" type="audio/mp3">
-                      Your browser does not support the audio element.
-                    </audio>
-                  </ng-container>
-                  <ng-container *ngIf="data.type === 'bot_response'" class="msg-bot">
-                    <div *ngIf="data.name === 'bot'" class="bot-response-details msg-bot">
-                      <p>{{ data?.result}}</p>
-                    </div>
-                  </ng-container>
-                </div>
-              </div>
-              
-            <div class="content-type-bar">
-                <div class="type-bar">
-                    <input class="text-input" type="text"  [(ngModel)] = "textInput" placeholder="Type your message...">
-                </div>
-                <span *ngIf="textInput !=''"> <img  class="icon-padding" src="../../assets/images/send_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="send button" width="24px" (click)="sendText()">
-                </span>
-                <span  class="icon-padding" *ngIf="textInput ===''" ><img src="../../assets/images/mic_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="attachment button" width="24px"> </span>
-            </div>
+  <div class="home-container">
+    <div class="content">
+      <div class="content-head">
+        <div class="head-title">
+          <span class="title">Ai Bot</span>
         </div>
+        <div class='ruler'>
+          <span class="horizontal-ruler"></span>
+        </div>
+      </div>
+      <div class="content-chat-screen" #chatContainer>
+        <div class="chat" *ngFor="let data of conversation ">
+          <ng-container *ngIf="data.type === 'text'">
+            <span class="msg-user">{{ data.content }}
+              <div class="time">{{ data.timestamp | date :'hh:mm a ' }}</div>
+            </span>
+          </ng-container>
+          <ng-container *ngIf="data.type === 'voicenote'">
+            <span class="msg-user">[Voice Note: Click to listen]
+              <audio controls>
+                <source [src]="data.audio_url" type="audio/mp3">
+                Your browser does not support the audio element.
+              </audio>
+            </span>
+          </ng-container>
+          <ng-container *ngIf="data.type === 'bot_response'" class="msg-bot">
+            <div *ngIf="data.name === 'bot'" class="bot-response-details msg-bot">
+              <p>{{ data?.result}}</p>
+              <div class="time left">{{ data.timestamp | date :'hh:mm a ' }}</div>
+              <div class="btn">
+                <button class="btn-class">Video</button>
+                <span class="btn-class">I</span>
+                <button class="btn-class">Transcipt</button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="content-type-bar">
+        <div class="type-bar">
+          <input class="text-input" type="text" [(ngModel)]="textInput" placeholder="Type your message...">
+        </div>
+        <span *ngIf="textInput !=''"> <img class="icon-padding"
+            src="../../assets/images/send_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="send button" width="24px"
+            (click)="sendText()">
+        </span>
+        <span class="icon-padding" *ngIf="textInput ===''"><img
+            src="../../assets/images/mic_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="attachment button" width="24px">
+        </span>
+      </div>
     </div>
+  </div>
 </div>
