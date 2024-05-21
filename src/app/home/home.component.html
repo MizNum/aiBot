@@ -17,8 +17,8 @@
             </span>
           </ng-container>
           <ng-container *ngIf="data.type === 'voicenote'">
-            <span class="msg-user">[Voice Note: Click to listen]
-              <audio controls>
+            <span class="msg-user">
+              <audio class="voice-note" controls>
                 <source [src]="data.audio_url" type="audio/mp3">
                 Your browser does not support the audio element.
               </audio>
@@ -26,12 +26,31 @@
           </ng-container>
           <ng-container *ngIf="data.type === 'bot_response'" class="msg-bot">
             <div *ngIf="data.name === 'bot'" class="bot-response-details msg-bot">
-              <p>{{ data?.result}}</p>
-              <div class="time left">{{ data.timestamp | date :'hh:mm a ' }}</div>
-              <div class="btn">
-                <button class="btn-class">Video</button>
-                <span class="btn-class">I</span>
-                <button class="btn-class">Transcipt</button>
+              <div class="summary">
+                {{ data?.result}}
+                <div class="time left">{{ data.timestamp | date :'hh:mm a ' }}</div>
+              </div>
+              <div class="summary-bottom">
+                <span class="timestamp">
+                  <span class="start-time">Start Time: {{data.seekTime.start }}</span>
+                  <span class="end-time">End Time: {{data.seekTime.end}}</span>
+                </span>
+                <span class="btns">
+                  <button (click)='data.vflag = !data.vflag;' class="btn-class">Video</button>
+                  <span class="btn-class">I</span>
+                  <button  (click)='data.tflag = !data.tflag;' class="btn-class">Transcipt</button>
+                </span>
+              </div>
+              <div class="parent-vid">
+                <span *ngIf="data.vflag" class="video">
+                  <video [src]="data.videoUrl" controls></video>
+                </span>
+              </div>
+              <div class="parent-trasncript">
+                <span *ngIf="data.tflag" class="transcript-class">
+                  <div class="transcript-title">Transcipt</div>
+                  <span >{{data.source}}</span>
+                </span>
               </div>
             </div>
           </ng-container>
@@ -42,12 +61,24 @@
         <div class="type-bar">
           <input class="text-input" type="text" [(ngModel)]="textInput" placeholder="Type your message...">
         </div>
-        <span *ngIf="textInput !=''"> <img class="icon-padding"
-            src="../../assets/images/send_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="send button" width="24px"
-            (click)="sendText()">
+        <span *ngIf="textInput !==''" (click)="sendText();"> <img class="icon-padding"
+            src="../../assets/images/send_40dp_FILL0_wght600_GRAD0_opsz40.svg"  alt="send button" width="24px">
         </span>
-        <span class="icon-padding" *ngIf="textInput ===''"><img
-            src="../../assets/images/mic_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="attachment button" width="24px">
+        <span *ngIf="textInput ===''" class="icon-padding">
+          <button *ngIf="mic" class="record-btn" (click)="startRecording()" [disabled]="isRecording">
+            <img src="../../assets/images/mic_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="mic" width="24px">
+          </button>
+
+          <button *ngIf="!mic" class="record-btn stop recording" (click)="stopRecording()" [disabled]="!isRecording">
+            <img src="../../assets/images/stop_circle_24dp_FILL0_wght400_GRAD0_opsz24.png" alt="stop" width="24px">
+          </button>
+        
+          <!-- <div *ngIf="aFlag" class="audio-recorder">
+            <div *ngIf="transcript">
+              <h3>Transcript:</h3>
+              <p>{{ transcript }}</p>
+            </div>
+          </div> -->
         </span>
       </div>
     </div>
