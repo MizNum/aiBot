@@ -30,14 +30,43 @@
 
 .head-title {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   margin: 15px 0px 15px 0px;
+  align-items: flex-end;
 }
 
 .title {
-  font-size: 2.3rem;
+  display: block;
+  font-size:3.5rem;
   color: #005694;
+  width: 70%;
 }
+
+.right-container{
+
+  display: flex;
+  flex-direction: column;
+  color: #005694;
+  background-color: whitesmoke;
+  padding: 3px;
+  border-radius: 4px;
+  max-width: 35%;
+  
+}
+
+.lang-title{
+font-size: 0.8rem;
+}
+select,.select-lang-class{
+  border: none;
+  outline: none;
+  background-color: none;
+  color: #005694;
+  padding: 5px;
+  border-radius: 4px;
+
+}
+
 
 .ruler {
   display: flex;
@@ -45,8 +74,7 @@
 }
 
 .horizontal-ruler {
-
-  width: 70%;
+  width: 100%;
   background-color: #005694;
   height: 3px;
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, HostListener, OnDestroy, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy, OnChanges, SimpleChanges, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Router, Navigation } from '@angular/router';
@@ -8,6 +8,7 @@ import { PopupService } from '../popup.service';
 import { filter } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 import { Environment } from '../environment';
+import { eventNames } from 'process';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +17,14 @@ import { Environment } from '../environment';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit, OnChanges {
+export class HomeComponent implements OnInit,AfterViewChecked {
+  
+  @ViewChild('startButton') startButton!: ElementRef;
+  @ViewChild('output') outputDiv!: ElementRef;
+  @ViewChild('chatContainer') chatContainerRef!: ElementRef;
+  
+  recognition: any;
+  errorMessage: string | null = null;
 
 
 
@@ -25,8 +33,7 @@ export class HomeComponent implements OnInit, OnChanges {
     private popUpService: PopupService,
     private router: Router
   ) { }
-
-  @ViewChild('chatContainer') chatContainer!: ElementRef;
+ 
   textInput = '';
   loggedIn: any;
   conversation: any;
@@ -34,105 +41,151 @@ export class HomeComponent implements OnInit, OnChanges {
   aFlag = false;
   mic = true;
   relativePath = 'http://localhost:3000';
-
-
-
+  preferredLanguage = 'en';
+  languages = [
+    { name: "Afrikaans", code: "af" },
+    { name: "Albanian", code: "sq" },
+    { name: "Amharic", code: "am" },
+    { name: "Arabic", code: "ar" },
+    { name: "Armenian", code: "hy" },
+    { name: "Assamese", code: "as" },
+    { name: "Aymara", code: "ay" },
+    { name: "Azerbaijani", code: "az" },
+    { name: "Bambara", code: "bm" },
+    { name: "Basque", code: "eu" },
+    { name: "Belarusian", code: "be" },
+    { name: "Bengali", code: "bn" },
+    { name: "Bhojpuri", code: "bho" },
+    { name: "Bosnian", code: "bs" },
+    { name: "Bulgarian", code: "bg" },
+    { name: "Catalan", code: "ca" },
+    { name: "Cebuano", code: "ceb" },
+    { name: "Chinese (Simplified)", code: "zh-CN" },
+    { name: "Chinese (Traditional)", code: "zh-TW" },
+    { name: "Corsican", code: "co" },
+    { name: "Croatian", code: "hr" },
+    { name: "Czech", code: "cs" },
+    { name: "Danish", code: "da" },
+    { name: "Dhivehi", code: "dv" },
+    { name: "Dogri", code: "doi" },
+    { name: "Dutch", code: "nl" },
+    { name: "English", code: "en" },
+    { name: "Esperanto", code: "eo" },
+    { name: "Estonian", code: "et" },
+    { name: "Ewe", code: "ee" },
+    { name: "Filipino (Tagalog)", code: "tl" },
+    { name: "Finnish", code: "fi" },
+    { name: "French", code: "fr" },
+    { name: "Frisian", code: "fy" },
+    { name: "Galician", code: "gl" },
+    { name: "Georgian", code: "ka" },
+    { name: "German", code: "de" },
+    { name: "Greek", code: "el" },
+    { name: "Guarani", code: "gn" },
+    { name: "Gujarati", code: "gu" },
+    { name: "Haitian Creole", code: "ht" },
+    { name: "Hausa", code: "ha" },
+    { name: "Hawaiian", code: "haw" },
+    { name: "Hebrew", code: "he" },
+    { name: "Hindi", code: "hi" },
+    { name: "Hmong", code: "hmn" },
+    { name: "Hungarian", code: "hu" },
+    { name: "Icelandic", code: "is" },
+    { name: "Igbo", code: "ig" },
+    { name: "Ilocano", code: "ilo" },
+    { name: "Indonesian", code: "id" },
+    { name: "Irish", code: "ga" },
+    { name: "Italian", code: "it" },
+    { name: "Japanese", code: "ja" },
+    { name: "Javanese", code: "jv" },
+    { name: "Kannada", code: "kn" },
+    { name: "Kazakh", code: "kk" },
+    { name: "Khmer", code: "km" },
+    { name: "Kinyarwanda", code: "rw" },
+    { name: "Konkani", code: "kok" },
+    { name: "Korean", code: "ko" },
+    { name: "Krio", code: "kri" },
+    { name: "Kurdish", code: "ku" },
+    { name: "Kurdish (Sorani)", code: "ckb" },
+    { name: "Kyrgyz", code: "ky" },
+    { name: "Lao", code: "lo" },
+    { name: "Latin", code: "la" },
+    { name: "Latvian", code: "lv" },
+    { name: "Lingala", code: "ln" },
+    { name: "Lithuanian", code: "lt" },
+    { name: "Luganda", code: "lg" },
+    { name: "Luxembourgish", code: "lb" },
+    { name: "Macedonian", code: "mk" },
+    { name: "Maithili", code: "mai" },
+    { name: "Malagasy", code: "mg" },
+    { name: "Malay", code: "ms" },
+    { name: "Malayalam", code: "ml" },
+    { name: "Maltese", code: "mt" },
+    { name: "Maori", code: "mi" },
+    { name: "Marathi", code: "mr" },
+    { name: "Meiteilon (Manipuri)", code: "mni" },
+    { name: "Mizo", code: "lus" },
+    { name: "Mongolian", code: "mn" },
+    { name: "Myanmar (Burmese)", code: "my" },
+    { name: "Nepali", code: "ne" },
+    { name: "Norwegian", code: "no" },
+    { name: "Nyanja (Chichewa)", code: "ny" },
+    { name: "Odia (Oriya)", code: "or" },
+    { name: "Oromo", code: "om" },
+    { name: "Pashto", code: "ps" },
+    { name: "Persian", code: "fa" },
+    { name: "Polish", code: "pl" },
+    { name: "Portuguese", code: "pt" },
+    { name: "Punjabi", code: "pa" },
+    { name: "Quechua", code: "qu" },
+    { name: "Romanian", code: "ro" },
+    { name: "Russian", code: "ru" },
+    { name: "Samoan", code: "sm" },
+    { name: "Sanskrit", code: "sa" },
+    { name: "Scots Gaelic", code: "gd" },
+    { name: "Sepedi", code: "nso" },
+    { name: "Serbian", code: "sr" },
+    { name: "Sesotho", code: "st" },
+    { name: "Shona", code: "sn" },
+    { name: "Sindhi", code: "sd" },
+    { name: "Sinhala (Sinhalese)", code: "si" },
+    { name: "Slovak", code: "sk" },
+    { name: "Slovenian", code: "sl" },
+    { name: "Somali", code: "so" },
+    { name: "Spanish", code: "es" },
+    { name: "Sundanese", code: "su" },
+    { name: "Swahili", code: "sw" },
+    { name: "Swedish", code: "sv" },
+    { name: "Tagalog (Filipino)", code: "tl" },
+    { name: "Tajik", code: "tg" },
+    { name: "Tamil", code: "ta" },
+    { name: "Tatar", code: "tt" },
+    { name: "Telugu", code: "te" },
+    { name: "Thai", code: "th" },
+    { name: "Tigrinya", code: "ti" },
+    { name: "Tsonga", code: "ts" },
+    { name: "Turkish", code: "tr" },
+    { name: "Turkmen", code: "tk" },
+    { name: "Twi (Akan)", code: "tw" },
+    { name: "Ukrainian", code: "uk" },
+    { name: "Urdu", code: "ur" },
+    { name: "Uyghur", code: "ug" },
+    { name: "Uzbek", code: "uz" },
+    { name: "Vietnamese", code: "vi" },
+    { name: "Welsh", code: "cy" },
+    { name: "Xhosa", code: "xh" },
+    { name: "Yiddish", code: "yi" },
+    { name: "Yoruba", code: "yo" },
+    { name: "Zulu", code: "zu" }
+  ];
+  
   isRecording = false;
   mediaRecorder: any;
   audioChunks: any[] = [];
   transcript: string | null = null;
 
-  startRecording() {
-    this.mic = false;
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.mediaRecorder.start();
-        this.isRecording = true;
-
-        this.mediaRecorder.addEventListener('dataavailable', (event: any) => {
-          this.audioChunks.push(event.data);
-        });
-
-        this.mediaRecorder.addEventListener('stop', () => {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-          this.audioChunks = [];
-          this.sendAudioToServer(audioBlob);
-        });
-      });
-  }
-
-  stopRecording() {
-    this.mic = true;
-    this.mediaRecorder.stop();
-    this.isRecording = false;
-  }
-
-  sendAudioToServer(audioBlob: Blob) {
-    const reader = new FileReader();
-  
-    reader.onloadend = () => {
-      if (reader.result) {
-        const base64String = reader.result.toString().replace(/^data:audio\/\w+;base64,/, '');
-        const requestBody = { 
-          file: base64String
-        };
-  
-        // Replace with your API endpoint and logic (assuming JSON format)
-        fetch(Environment.UPLOAD_API, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestBody)
-        })
-        .then(response => response.json())
-        .then(data => {
-          const newAudio = this.relativePath+data.url;
-          console.log(newAudio);
-
-          const voice_note = {
-            "type":"voicenote",
-            "sender":"sender",
-            "timestamp": new Date().toISOString(),
-            "audio_url": newAudio,
-            "content": "This is the mesasge got from audio"
-          }
-
-          this.conversation.push(voice_note);
-
-        })
-        .catch(error => console.error('Error:', error));
-      } else {
-        console.error('Error reading audio blob');
-      }
-    };
-  
-    reader.readAsDataURL(audioBlob);
-  }
-
-
-
-  
-
-  ngOnChanges(changes: SimpleChanges): void {
-    
-    if (this.chatContainer)
-      this.scrollToBottom();
-
-  }
-
-
 
   ngOnInit(): void {
-    
-    // if(window === undefined || localStorage === undefined){
-    //     this.popUpService.toast('Please login First');
-    //     this.router.navigate(['']);
-    // }
-    if (this.chatContainer)
-      this.scrollToBottom();
-
 
     this.conversation = [
       {
@@ -146,8 +199,8 @@ export class HomeComponent implements OnInit, OnChanges {
         "sender": "bot",
         "timestamp": "2024-05-07 10:01:00 AM",
         "name": "bot",
-        "videoUrl": "../../assets/video/360p.mp4", 
-            "vflag":false,
+        "videoUrl": "360p.mp4", 
+        "vflag":false,
         "vtlag":false,
         "Summary": "Summary by Gpt",
         "startTime": "hh:mm:ss",
@@ -274,9 +327,158 @@ export class HomeComponent implements OnInit, OnChanges {
         },
         "source": "So that's what we want to have. So for logistic regression, there is a very concrete loss function that we always use. And this loss function is defined like this, and this is called the logistic loss. And so let's look at what this does. So our target class, Y, is either zero or it is one. If it's either zero or one, if it's zero, this means this part vanishes over here. If it's one, it means this part vanishes over here because this part, thing becomes zero. So it means either we have this part, or we have this part of the loss function. Depending on the value of Y. So if we say Y is equal to one, and this part over here vanishes, and it means we take, our loss function will be the logarithm of our prediction. So logarithm of our prediction. So what is if we get a large prediction? So how does the log of any function look like? So I haven't made a plot of this. Would have been nice if I had some internet connection right now. Hmm., So let's see if I can get. So, ah yeah, some plot of logarithm. So the"
       },
-    ]
+    ];
+
+    
+    this.initSpeechRecognition();
+    console.log('intital speech is recoginized.')
+
+  }
 
 
+
+  ngAfterViewInit(): void {
+    console.log(this.startButton);
+    console.log(this.outputDiv);
+    console.log(this.chatContainerRef);
+  }
+
+  initSpeechRecognition(): void {
+    const SpeechRecognition = (window as any).SpeechRecognition || 
+                              (window as any).webkitSpeechRecognition ||
+                              (window as any).mozSpeechRecognition ||
+                              (window as any).msSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      this.errorMessage = "Web Speech API is not supported in this browser.";
+      return;
+    }
+
+    this.recognition = new SpeechRecognition();
+    this.recognition.interimResults = true;
+    this.recognition.lang = 'en-US';
+
+    this.recognition.onstart = () => {
+      this.startButton.nativeElement.textContent = 'Listening...';
+      console.log('listening');
+      this.isRecording = true;
+    };
+
+    this.recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      // this.outputDiv.nativeElement.textContent = transcript;
+      // console.log(transcript);
+      this.textInput = transcript;
+    };
+
+    this.recognition.onerror = (event: any) => {
+      this.errorMessage = `Error occurred in recognition: ${event.error}`;
+      this.startButton.nativeElement.textContent = 'Start Voice Input';
+    };
+
+    this.recognition.onend = () => {
+      // this.startButton.nativeElement.textContent = 'Start Voice Input';
+      this.mic = true;
+      this.isRecording = false;
+    };
+  }
+
+  startVoiceInput(): void {
+    this.mic = false;
+    if (this.recognition) {
+      this.errorMessage = null;
+      this.recognition.start();
+    } else {
+      this.errorMessage = "Speech recognition is not initialized.";
+    }
+  }
+
+  ngAfterViewChecked(): void {
+      this.recognition.onresult = (event: any)=>{
+        this.textInput = event.results[0][0].transcript;
+        console.log('inout ',this.textInput);
+      }
+  }
+
+  scrollToBottom() {
+    const chatContainer = this.chatContainerRef.nativeElement;
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  
+  }
+
+
+  changeLanguage(){
+    console.log('Language selected is ',this.preferredLanguage);
+
+  }
+
+  startRecording() {
+    this.mic = false;
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        this.mediaRecorder = new MediaRecorder(stream);
+        this.mediaRecorder.start();
+        this.isRecording = true;
+
+        this.mediaRecorder.addEventListener('dataavailable', (event: any) => {
+          this.audioChunks.push(event.data);
+        });
+
+        this.mediaRecorder.addEventListener('stop', () => {
+          const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+          this.audioChunks = [];
+          this.sendAudioToServer(audioBlob);
+        });
+      });
+  }
+
+  stopRecording() {
+    this.mic = true;
+    this.mediaRecorder.stop();
+    this.isRecording = false;
+  }
+
+  sendAudioToServer(audioBlob: Blob) {
+    const reader = new FileReader();
+  
+    reader.onloadend = () => {
+      if (reader.result) {
+        const base64String = reader.result.toString().replace(/^data:audio\/\w+;base64,/, '');
+        const requestBody = { 
+          file: base64String
+        };
+  
+        // Replace with your API endpoint and logic (assuming JSON format)
+        fetch(Environment.UPLOAD_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        })
+        .then(response => response.json())
+        .then(data => {
+          const newAudio = this.relativePath+data.url;
+          console.log(newAudio);
+
+          const voice_note = {
+            "type":"voicenote",
+            "sender":"sender",
+            "timestamp": new Date().toISOString(),
+            "audio_url": newAudio,
+            "content": "This is the mesasge got from audio"
+          }
+
+          this.conversation.push(voice_note);
+
+        })
+        .catch(error => console.error('Error:', error));
+      } else {
+        console.error('Error reading audio blob');
+      }
+    };
+  
+    reader.readAsDataURL(audioBlob);
   }
 
 
@@ -313,18 +515,7 @@ export class HomeComponent implements OnInit, OnChanges {
 
     )
 
-    console.log('TExt is added ');
-    this.scrollToBottom();
-  }
-
-  scrollToBottom() {
-    console.log('Ng Changes worked ');
-    try {
-      // Scroll to the bottom of the chat container
-      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
-    } catch (err) {
-      console.error('Error scrolling to bottom:', err);
-    }
+    console.log('Text is added');
   }
 
 
