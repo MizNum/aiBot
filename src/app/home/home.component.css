@@ -144,6 +144,7 @@ select,.select-lang-class{
 .summary-bottom {
   display: flex;
   justify-content: space-between;
+  align-items: flex-end;
   background-color: #005694;
   padding:  0px 8px;
   border-radius: 0px 0px 4px 4px;
@@ -156,6 +157,7 @@ select,.select-lang-class{
   color: white;
 }
 .btns{
+  display: flex;
   padding: auto;
   align-self: center;
   height: 100%;
@@ -168,6 +170,13 @@ select,.select-lang-class{
   background-color: #005694;
   border: none;
   font-size: 0.9rem;
+}
+
+.vertical-ruler{
+  margin-top: 7%;
+  background-color: white;
+  height:55%;
+  width: 2px;
 }
 
 .btn-class:hover {

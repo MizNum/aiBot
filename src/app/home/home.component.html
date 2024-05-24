@@ -1,6 +1,7 @@
 <div class="home">
   <div class="home-container">
     <div class="content">
+      <app-loader *ngIf="loading"></app-loader>
       <div class="content-head">
         <div class="head-title">
           <span class="title">Ai Bot</span>
@@ -9,7 +10,7 @@
               Preferred Language
             </span>
             <span class="select-lang-class">
-              <select (change)="changeLanguage()"  [(ngModel)]="preferredLanguage">  
+              <select (change)="changeLanguage()"  [(ngModel)]="currentLanguage">  
                 <option [value]="'en'">English</option>
                 <option *ngFor="let language of languages" [value]="language.code">{{ language.name }}</option>
               </select>
@@ -48,13 +49,13 @@
                 </span>
                 <span class="btns">
                   <button (click)='data.vflag = !data.vflag;' class="btn-class">Video</button>
-                  <span class="btn-class">I</span>
+                  <span class="vertical"></span>
                   <button  (click)='data.tflag = !data.tflag;' class="btn-class">Transcipt</button>
                 </span>
               </div>
               <div class="parent-vid">
                 <span *ngIf="data.vflag" class="video">
-                  <video [src]="data.videoUrl" controls></video>
+                  <video [src]="relativeVideoPath+data.videoUrl" controls></video>
                 </span>
               </div>
               <div class="parent-trasncript">
@@ -67,15 +68,15 @@
           </ng-container>
         </div>
       </div>
-
+      <app-wait *ngIf="wait"></app-wait>
       <div class="content-type-bar">
-        <div class="type-bar">
+        <span class="type-bar">
           <input class="text-input" type="text" [(ngModel)]="textInput" placeholder="Type your message..." #output>
-        </div>
-        <span *ngIf="!mic "  (click)="sendText();"> <img class="icon-padding"
+        </span>
+        <span *ngIf="textInput !=='' "  (click)="sendText();"> <img class="icon-padding"
             src="../../assets/images/send_40dp_FILL0_wght600_GRAD0_opsz40.svg"  alt="send button" width="24px">
         </span>
-        <span *ngIf="mic"  class="icon-padding">
+        <span *ngIf="mic && textInput ==='' "  class="icon-padding">
           <button *ngIf="!recording" class="record-btn" (click)="startVoiceInput();"  >
             <img src="../../assets/images/mic_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="mic" width="24px">
           </button>

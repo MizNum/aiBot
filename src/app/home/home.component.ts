@@ -9,11 +9,14 @@ import { filter } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 import { Environment } from '../environment';
 import { eventNames } from 'process';
+import { ResponseService } from '../response.service';
+import { LoaderComponent } from '../loader/loader.component';
+import { WaitComponent } from '../wait/wait.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule,MatCardModule],
+  imports: [CommonModule, FormsModule,MatCardModule,LoaderComponent,WaitComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -25,14 +28,15 @@ export class HomeComponent implements OnInit {
   
   recognition: any;
   errorMessage: string | null = null;
-
+  lang!:any;
 
 
   constructor(
     private route: ActivatedRoute,
     private popUpService: PopupService,
     private router: Router,
-    private renderer : Renderer2
+    private renderer : Renderer2,
+    private response : ResponseService
   ) { }
  
   textInput = '';
@@ -42,21 +46,20 @@ export class HomeComponent implements OnInit {
   aFlag = false;
   mic = true;
   relativePath = 'http://localhost:3000';
-  preferredLanguage = 'en';
+  relativeVideoPath = 'http://localhost:3000/Video/';
+  
+  preLanguage = [''];
+  currentLanguage = 'en';
   languages = [
     { name: "Afrikaans", code: "af" },
     { name: "Albanian", code: "sq" },
     { name: "Amharic", code: "am" },
     { name: "Arabic", code: "ar" },
     { name: "Armenian", code: "hy" },
-    { name: "Assamese", code: "as" },
-    { name: "Aymara", code: "ay" },
     { name: "Azerbaijani", code: "az" },
-    { name: "Bambara", code: "bm" },
     { name: "Basque", code: "eu" },
     { name: "Belarusian", code: "be" },
     { name: "Bengali", code: "bn" },
-    { name: "Bhojpuri", code: "bho" },
     { name: "Bosnian", code: "bs" },
     { name: "Bulgarian", code: "bg" },
     { name: "Catalan", code: "ca" },
@@ -67,13 +70,9 @@ export class HomeComponent implements OnInit {
     { name: "Croatian", code: "hr" },
     { name: "Czech", code: "cs" },
     { name: "Danish", code: "da" },
-    { name: "Dhivehi", code: "dv" },
-    { name: "Dogri", code: "doi" },
     { name: "Dutch", code: "nl" },
-    { name: "English", code: "en" },
     { name: "Esperanto", code: "eo" },
     { name: "Estonian", code: "et" },
-    { name: "Ewe", code: "ee" },
     { name: "Filipino (Tagalog)", code: "tl" },
     { name: "Finnish", code: "fi" },
     { name: "French", code: "fr" },
@@ -82,7 +81,6 @@ export class HomeComponent implements OnInit {
     { name: "Georgian", code: "ka" },
     { name: "German", code: "de" },
     { name: "Greek", code: "el" },
-    { name: "Guarani", code: "gn" },
     { name: "Gujarati", code: "gu" },
     { name: "Haitian Creole", code: "ht" },
     { name: "Hausa", code: "ha" },
@@ -93,7 +91,6 @@ export class HomeComponent implements OnInit {
     { name: "Hungarian", code: "hu" },
     { name: "Icelandic", code: "is" },
     { name: "Igbo", code: "ig" },
-    { name: "Ilocano", code: "ilo" },
     { name: "Indonesian", code: "id" },
     { name: "Irish", code: "ga" },
     { name: "Italian", code: "it" },
@@ -103,48 +100,36 @@ export class HomeComponent implements OnInit {
     { name: "Kazakh", code: "kk" },
     { name: "Khmer", code: "km" },
     { name: "Kinyarwanda", code: "rw" },
-    { name: "Konkani", code: "kok" },
     { name: "Korean", code: "ko" },
-    { name: "Krio", code: "kri" },
     { name: "Kurdish", code: "ku" },
-    { name: "Kurdish (Sorani)", code: "ckb" },
     { name: "Kyrgyz", code: "ky" },
     { name: "Lao", code: "lo" },
     { name: "Latin", code: "la" },
     { name: "Latvian", code: "lv" },
-    { name: "Lingala", code: "ln" },
     { name: "Lithuanian", code: "lt" },
-    { name: "Luganda", code: "lg" },
     { name: "Luxembourgish", code: "lb" },
     { name: "Macedonian", code: "mk" },
-    { name: "Maithili", code: "mai" },
     { name: "Malagasy", code: "mg" },
     { name: "Malay", code: "ms" },
     { name: "Malayalam", code: "ml" },
     { name: "Maltese", code: "mt" },
     { name: "Maori", code: "mi" },
     { name: "Marathi", code: "mr" },
-    { name: "Meiteilon (Manipuri)", code: "mni" },
-    { name: "Mizo", code: "lus" },
     { name: "Mongolian", code: "mn" },
     { name: "Myanmar (Burmese)", code: "my" },
     { name: "Nepali", code: "ne" },
     { name: "Norwegian", code: "no" },
     { name: "Nyanja (Chichewa)", code: "ny" },
     { name: "Odia (Oriya)", code: "or" },
-    { name: "Oromo", code: "om" },
     { name: "Pashto", code: "ps" },
     { name: "Persian", code: "fa" },
     { name: "Polish", code: "pl" },
     { name: "Portuguese", code: "pt" },
     { name: "Punjabi", code: "pa" },
-    { name: "Quechua", code: "qu" },
     { name: "Romanian", code: "ro" },
     { name: "Russian", code: "ru" },
     { name: "Samoan", code: "sm" },
-    { name: "Sanskrit", code: "sa" },
     { name: "Scots Gaelic", code: "gd" },
-    { name: "Sepedi", code: "nso" },
     { name: "Serbian", code: "sr" },
     { name: "Sesotho", code: "st" },
     { name: "Shona", code: "sn" },
@@ -163,11 +148,8 @@ export class HomeComponent implements OnInit {
     { name: "Tatar", code: "tt" },
     { name: "Telugu", code: "te" },
     { name: "Thai", code: "th" },
-    { name: "Tigrinya", code: "ti" },
-    { name: "Tsonga", code: "ts" },
     { name: "Turkish", code: "tr" },
     { name: "Turkmen", code: "tk" },
-    { name: "Twi (Akan)", code: "tw" },
     { name: "Ukrainian", code: "uk" },
     { name: "Urdu", code: "ur" },
     { name: "Uyghur", code: "ug" },
@@ -184,11 +166,35 @@ export class HomeComponent implements OnInit {
   audioChunks: any[] = [];
   transcript: string | null = null;
   recording = false;
+ 
+
+
+
+
+
+
+  wait = false;
+  startWaiting(){
+    this.wait = true;
+  }
+  stopWaiting(){
+    this.wait = false;
+  }
+
+
+  loading = false;
+  startLoading() {
+    this.loading = true;
+  }
+
+  stopLoading() {
+    this.loading = false;
+  }
 
 
   ngOnInit(): void {
+    this.preLanguage.push(this.currentLanguage);
     this.session = localStorage.getItem('session');
-
     if((this.session !== 'true')){
         this.popUpService.toast('Please login first.');
         this.router.navigate(['']);
@@ -207,7 +213,7 @@ export class HomeComponent implements OnInit {
         "sender": "bot",
         "timestamp": "2024-05-07 10:01:00 AM",
         "name": "bot",
-        "videoUrl": "360p.mp4", 
+        "videoUrl": "LinearRegression.mp4", 
         "vflag":false,
         "vtlag":false,
         "Summary": "Summary by Gpt",
@@ -236,7 +242,7 @@ export class HomeComponent implements OnInit {
         "sender": "bot",
         "timestamp": "2024-05-07 10:03:30 AM",
         "name": "bot",
-        "videoUrl": "../../assets/video/360p.mp4",
+        "videoUrl": "LinearRegression.mp4",
              "vflag":false,
         "vtlag":false,
         "Summary": "Summary by Gpt",
@@ -264,7 +270,7 @@ export class HomeComponent implements OnInit {
         "sender": "bot",
         "timestamp": "2024-05-07 10:01:00 AM",
         "name": "bot",
-        "videoUrl": "../../assets/video/360p.mp4", 
+        "videoUrl": "LinearRegression.mp4", 
             "vflag":false,
         "vtlag":false,
         "Summary": "Summary by Gpt",
@@ -292,7 +298,7 @@ export class HomeComponent implements OnInit {
         "sender": "bot",
         "timestamp": "2024-05-07 10:01:00 AM",
         "name": "bot",
-        "videoUrl": "../../assets/video/360p.mp4", 
+        "videoUrl": "LinearRegression.mp4", 
             "vflag":false,
         "vtlag":false,
         "Summary": "Summary by Gpt",
@@ -320,7 +326,7 @@ export class HomeComponent implements OnInit {
         "sender": "bot",
         "timestamp": "2024-05-07 10:01:00 AM",
         "name": "bot",  
-        "videoUrl": "../../assets/video/360p.mp4", 
+        "videoUrl": "LinearRegression.mp4", 
         "Summary": "Summary by Gpt",
         "startTime": "hh:mm:ss",
         "endTime": "hh:mm:ss",
@@ -413,14 +419,21 @@ export class HomeComponent implements OnInit {
   }
 
 
-  changeLanguage(){
-    console.log('Language selected is ',this.preferredLanguage);
-
+  async changeLanguage(){
+    this.preLanguage.push(this.currentLanguage);
+    console.log('Previous language is ',this.preLanguage[this.preLanguage.length-2]);
+    console.log('Language selected is ',this.currentLanguage);
+    this.startLoading();
+    const response = await this.response.translate(this.conversation,this.currentLanguage);
+    if(response!==undefined)
+    this.conversation = response;
+    this.stopLoading();
+    
   }
 
 
 
-  sendText() {
+  async sendText() {
     if(this.textInput === ''){
         this.popUpService.toast('No message found');
         this.textInput = '';
@@ -433,32 +446,14 @@ export class HomeComponent implements OnInit {
         "timestamp": new Date().toISOString(),
         "content": this.textInput
       })
-  
+      this.scrollToBottom();
+      this.startWaiting();
+      const reply = await this.response.response(this.textInput,this.currentLanguage);
+      this.conversation.push(reply);
       this.outputRef.nativeElement.value = '';
       this.textInput = '';
-      this.conversation.push({
-        "type": "bot_response",
-        "sender": "bot",
-        "timestamp": "2024-05-07 10:01:00 AM",
-        "name": "bot",
-        "videoUrl": "../../assets/video/360p.mp4", "vflag":false,
-        "Summary": "Summary by Gpt",
-        "startTime": "hh:mm:ss",
-        "endTime": "hh:mm:ss",
-        "result": "The logistic regression is a technique used for binary classification or binary response analysis. It is a linear regression algorithm that estimates the probability of an observation's outcome based on input variables. In logistic regression, we assume that each observation belongs to one or more categories, and we predict the probability of the observation belonging to each category given its input variables. The output for each observation is the predicted outcome (0 or 1), which determines whether the observation belongs to the true class, and the actual outcome (0 or 1) determines the probability of being in the true class.\n\nThe logistic regression algorithm works as follows:\n\n1. Calculate the log-odds ratios based on each input variable's estimated value and the predicted outcome for the observation. These log-odds ratios are used to calculate the probability of the observation's belonging to each category.\n\n2. Calculate the probability of the observation belonging to class 1 (or 0) given its input variables and predicted output using the formula: P(Y=1|X, O) = log(L/H), where L is the logistic likelihood function for class 1, H is the logistic likelihood function for class 0, and L is the logistic log-likelihood for class 1 and H is the logistic log-likelihood for class 0.\n\n3. Calculate the output (P(O=1|X)) using the formula: P(Y=1|X) = exp(logits).\n\nThe logistic regression algorithm works by finding the coefficients of each input variable that best fit the data, which are usually chosen by maximizing the likelihood function. The logistic regression output is then used to predict the probability of a specific observation belonging to each category.",
-        "seekTime": {
-          "end": 1044.4599999999998,
-          "id": 268,
-          "seek": 103086,
-          "start": 1042.4599999999998,
-          "text": " So for logistic regression,",
-          "video_name": "2023-10-04_KInt_default"
-        },
-        "source": "So that's what we want to have. So for logistic regression, there is a very concrete loss function that we always use. And this loss function is defined like this, and this is called the logistic loss. And so let's look at what this does. So our target class, Y, is either zero or it is one. If it's either zero or one, if it's zero, this means this part vanishes over here. If it's one, it means this part vanishes over here because this part, thing becomes zero. So it means either we have this part, or we have this part of the loss function. Depending on the value of Y. So if we say Y is equal to one, and this part over here vanishes, and it means we take, our loss function will be the logarithm of our prediction. So logarithm of our prediction. So what is if we get a large prediction? So how does the log of any function look like? So I haven't made a plot of this. Would have been nice if I had some internet connection right now. Hmm., So let's see if I can get. So, ah yeah, some plot of logarithm. So the"
-      }
-  
-      )
       this.mic = true;
+      this.stopWaiting();
     }
      this.scrollToBottom();
   }

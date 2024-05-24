@@ -13,21 +13,39 @@ export class ResponseService {
     private popUpService : PopupService,
   ) {}
 
-  async response(text: string): Promise<string | undefined> {
+  async response(text: string,lang: string): Promise<[] | undefined> {
     const apiUrl = Environment.RESPONSE_API;
-    const data = { "text" : text};
+    const data = { "text" : text, "lang": lang};
 
     try {
         const response = await axios.post(apiUrl, data);
-        // console.log(response.data);
-        return response.data as string;
+        return response.data?.response ;
     } catch (error) {
         this.popUpService.toast('Failed to fetch response.');
       console.error('Error:', error);
 
         return undefined; 
     }
-}
+ }
+
+ async translate( conversation : any,targetLanguage : string) : Promise<[] |undefined>{
+
+    const apiUrl = Environment.TRANSLATE_API;
+    const data = {
+      conversation : conversation,
+      targetLang : targetLanguage,
+      sourceLang : '',
+    }
+    try {
+       const response = await axios.post (apiUrl,data);
+       console.log(response.data);
+       return response?.data?.translatedConversation;
+    } catch (error) {
+      this.popUpService.toast('Error while translating!Please Refresh');
+      console.error('Error ',error);
+      return undefined;
+    }
+ }
 
 
 }
