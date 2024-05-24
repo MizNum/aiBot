@@ -72,24 +72,17 @@
         <div class="type-bar">
           <input class="text-input" type="text" [(ngModel)]="textInput" placeholder="Type your message..." #output>
         </div>
-        <span *ngIf="textInput !==''" (click)="sendText();"> <img class="icon-padding"
+        <span *ngIf="!mic "  (click)="sendText();"> <img class="icon-padding"
             src="../../assets/images/send_40dp_FILL0_wght600_GRAD0_opsz40.svg"  alt="send button" width="24px">
         </span>
-        <span *ngIf="textInput ===''" class="icon-padding">
-          <button *ngIf="mic" class="record-btn" (click)="startVoiceInput();" [disabled]="isRecording"  >
+        <span *ngIf="mic"  class="icon-padding">
+          <button *ngIf="!recording" class="record-btn" (click)="startVoiceInput();"  >
             <img src="../../assets/images/mic_40dp_FILL0_wght600_GRAD0_opsz40.svg" alt="mic" width="24px">
           </button>
 
-          <button *ngIf="!mic" class="record-btn stop recording" (click)="stopRecording()" [disabled]="!isRecording">
+          <button *ngIf="recording" (click)="stopVoiceInput()" class="record-btn stop recording" #closeButton>
             <img src="../../assets/images/stop_circle_24dp_FILL0_wght400_GRAD0_opsz24.png" alt="stop" width="24px">
           </button>
-        
-          <!-- <div *ngIf="aFlag" class="audio-recorder">
-            <div *ngIf="transcript">
-              <h3>Transcript:</h3>
-              <p>{{ transcript }}</p>
-            </div>
-          </div> -->
         </span>
       </div>
     </div>

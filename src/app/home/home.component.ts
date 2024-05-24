@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, HostListener, OnDestroy, OnChanges, SimpleChanges, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit,Renderer2, HostListener, OnDestroy, OnChanges, SimpleChanges, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Router, Navigation } from '@angular/router';
@@ -17,11 +17,11 @@ import { eventNames } from 'process';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit,AfterViewChecked {
+export class HomeComponent implements OnInit {
   
-  @ViewChild('startButton') startButton!: ElementRef;
-  @ViewChild('output') outputDiv!: ElementRef;
   @ViewChild('chatContainer') chatContainerRef!: ElementRef;
+  @ViewChild('output') outputRef!: ElementRef;
+  @ViewChild('closeButton') closeButtonRef!: ElementRef;
   
   recognition: any;
   errorMessage: string | null = null;
@@ -31,11 +31,12 @@ export class HomeComponent implements OnInit,AfterViewChecked {
   constructor(
     private route: ActivatedRoute,
     private popUpService: PopupService,
-    private router: Router
+    private router: Router,
+    private renderer : Renderer2
   ) { }
  
   textInput = '';
-  loggedIn: any;
+  session ! :any;
   conversation: any;
   video = false;
   aFlag = false;
@@ -178,14 +179,21 @@ export class HomeComponent implements OnInit,AfterViewChecked {
     { name: "Yoruba", code: "yo" },
     { name: "Zulu", code: "zu" }
   ];
-  
   isRecording = false;
   mediaRecorder: any;
   audioChunks: any[] = [];
   transcript: string | null = null;
+  recording = false;
 
 
   ngOnInit(): void {
+    this.session = localStorage.getItem('session');
+
+    if((this.session !== 'true')){
+        this.popUpService.toast('Please login first.');
+        this.router.navigate(['']);
+
+    }
 
     this.conversation = [
       {
@@ -329,19 +337,16 @@ export class HomeComponent implements OnInit,AfterViewChecked {
       },
     ];
 
+
     
     this.initSpeechRecognition();
-    console.log('intital speech is recoginized.')
+    // console.log('intital speech is recoginized.')
 
   }
 
 
 
-  ngAfterViewInit(): void {
-    console.log(this.startButton);
-    console.log(this.outputDiv);
-    console.log(this.chatContainerRef);
-  }
+  ngAfterViewInit(): void {  }
 
   initSpeechRecognition(): void {
     const SpeechRecognition = (window as any).SpeechRecognition || 
@@ -359,46 +364,47 @@ export class HomeComponent implements OnInit,AfterViewChecked {
     this.recognition.lang = 'en-US';
 
     this.recognition.onstart = () => {
-      this.startButton.nativeElement.textContent = 'Listening...';
-      console.log('listening');
-      this.isRecording = true;
-    };
+      this.outputRef.nativeElement.value ='Listening....';
+        };
 
     this.recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      // this.outputDiv.nativeElement.textContent = transcript;
-      // console.log(transcript);
-      this.textInput = transcript;
+      this.outputRef.nativeElement.value = event.results[0][0].transcript;
+      this.textInput = event.results[0][0].transcript;
+      console.log(this.textInput);
     };
 
     this.recognition.onerror = (event: any) => {
       this.errorMessage = `Error occurred in recognition: ${event.error}`;
-      this.startButton.nativeElement.textContent = 'Start Voice Input';
+      this.popUpService.toast('Error occurrred in  recognition');
     };
 
-    this.recognition.onend = () => {
-      // this.startButton.nativeElement.textContent = 'Start Voice Input';
-      this.mic = true;
-      this.isRecording = false;
+    this.recognition.onend = (event: any) => {
+      this.mic = false;
+      this.recording = false;
     };
   }
 
   startVoiceInput(): void {
-    this.mic = false;
+    this.recording = true;
     if (this.recognition) {
       this.errorMessage = null;
       this.recognition.start();
+      // this.mic = false;
     } else {
       this.errorMessage = "Speech recognition is not initialized.";
     }
   }
-
-  ngAfterViewChecked(): void {
-      this.recognition.onresult = (event: any)=>{
-        this.textInput = event.results[0][0].transcript;
-        console.log('inout ',this.textInput);
-      }
+  stopVoiceInput(): void {
+    if (this.recognition) {
+      this.recognition.stop();
+    }
+    this.mic = false;
+    this.recording = false;
+    this.outputRef.nativeElement.value = '';
   }
+
+
+
 
   scrollToBottom() {
     const chatContainer = this.chatContainerRef.nativeElement;
@@ -412,110 +418,49 @@ export class HomeComponent implements OnInit,AfterViewChecked {
 
   }
 
-  startRecording() {
-    this.mic = false;
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.mediaRecorder.start();
-        this.isRecording = true;
-
-        this.mediaRecorder.addEventListener('dataavailable', (event: any) => {
-          this.audioChunks.push(event.data);
-        });
-
-        this.mediaRecorder.addEventListener('stop', () => {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-          this.audioChunks = [];
-          this.sendAudioToServer(audioBlob);
-        });
-      });
-  }
-
-  stopRecording() {
-    this.mic = true;
-    this.mediaRecorder.stop();
-    this.isRecording = false;
-  }
-
-  sendAudioToServer(audioBlob: Blob) {
-    const reader = new FileReader();
-  
-    reader.onloadend = () => {
-      if (reader.result) {
-        const base64String = reader.result.toString().replace(/^data:audio\/\w+;base64,/, '');
-        const requestBody = { 
-          file: base64String
-        };
-  
-        // Replace with your API endpoint and logic (assuming JSON format)
-        fetch(Environment.UPLOAD_API, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestBody)
-        })
-        .then(response => response.json())
-        .then(data => {
-          const newAudio = this.relativePath+data.url;
-          console.log(newAudio);
-
-          const voice_note = {
-            "type":"voicenote",
-            "sender":"sender",
-            "timestamp": new Date().toISOString(),
-            "audio_url": newAudio,
-            "content": "This is the mesasge got from audio"
-          }
-
-          this.conversation.push(voice_note);
-
-        })
-        .catch(error => console.error('Error:', error));
-      } else {
-        console.error('Error reading audio blob');
-      }
-    };
-  
-    reader.readAsDataURL(audioBlob);
-  }
 
 
   sendText() {
-    this.conversation.push({
-      "type": "text",
-      "sender": "user",
-      "timestamp": new Date().toISOString(),
-      "content": this.textInput
-    })
-
-    this.textInput = '';
-
-    this.conversation.push({
-      "type": "bot_response",
-      "sender": "bot",
-      "timestamp": "2024-05-07 10:01:00 AM",
-      "name": "bot",
-      "videoUrl": "../../assets/video/360p.mp4", "vflag":false,
-      "Summary": "Summary by Gpt",
-      "startTime": "hh:mm:ss",
-      "endTime": "hh:mm:ss",
-      "result": "The logistic regression is a technique used for binary classification or binary response analysis. It is a linear regression algorithm that estimates the probability of an observation's outcome based on input variables. In logistic regression, we assume that each observation belongs to one or more categories, and we predict the probability of the observation belonging to each category given its input variables. The output for each observation is the predicted outcome (0 or 1), which determines whether the observation belongs to the true class, and the actual outcome (0 or 1) determines the probability of being in the true class.\n\nThe logistic regression algorithm works as follows:\n\n1. Calculate the log-odds ratios based on each input variable's estimated value and the predicted outcome for the observation. These log-odds ratios are used to calculate the probability of the observation's belonging to each category.\n\n2. Calculate the probability of the observation belonging to class 1 (or 0) given its input variables and predicted output using the formula: P(Y=1|X, O) = log(L/H), where L is the logistic likelihood function for class 1, H is the logistic likelihood function for class 0, and L is the logistic log-likelihood for class 1 and H is the logistic log-likelihood for class 0.\n\n3. Calculate the output (P(O=1|X)) using the formula: P(Y=1|X) = exp(logits).\n\nThe logistic regression algorithm works by finding the coefficients of each input variable that best fit the data, which are usually chosen by maximizing the likelihood function. The logistic regression output is then used to predict the probability of a specific observation belonging to each category.",
-      "seekTime": {
-        "end": 1044.4599999999998,
-        "id": 268,
-        "seek": 103086,
-        "start": 1042.4599999999998,
-        "text": " So for logistic regression,",
-        "video_name": "2023-10-04_KInt_default"
-      },
-      "source": "So that's what we want to have. So for logistic regression, there is a very concrete loss function that we always use. And this loss function is defined like this, and this is called the logistic loss. And so let's look at what this does. So our target class, Y, is either zero or it is one. If it's either zero or one, if it's zero, this means this part vanishes over here. If it's one, it means this part vanishes over here because this part, thing becomes zero. So it means either we have this part, or we have this part of the loss function. Depending on the value of Y. So if we say Y is equal to one, and this part over here vanishes, and it means we take, our loss function will be the logarithm of our prediction. So logarithm of our prediction. So what is if we get a large prediction? So how does the log of any function look like? So I haven't made a plot of this. Would have been nice if I had some internet connection right now. Hmm., So let's see if I can get. So, ah yeah, some plot of logarithm. So the"
+    if(this.textInput === ''){
+        this.popUpService.toast('No message found');
+        this.textInput = '';
     }
+    else{
 
-    )
-
-    console.log('Text is added');
+      this.conversation.push({
+        "type": "text",
+        "sender": "user",
+        "timestamp": new Date().toISOString(),
+        "content": this.textInput
+      })
+  
+      this.outputRef.nativeElement.value = '';
+      this.textInput = '';
+      this.conversation.push({
+        "type": "bot_response",
+        "sender": "bot",
+        "timestamp": "2024-05-07 10:01:00 AM",
+        "name": "bot",
+        "videoUrl": "../../assets/video/360p.mp4", "vflag":false,
+        "Summary": "Summary by Gpt",
+        "startTime": "hh:mm:ss",
+        "endTime": "hh:mm:ss",
+        "result": "The logistic regression is a technique used for binary classification or binary response analysis. It is a linear regression algorithm that estimates the probability of an observation's outcome based on input variables. In logistic regression, we assume that each observation belongs to one or more categories, and we predict the probability of the observation belonging to each category given its input variables. The output for each observation is the predicted outcome (0 or 1), which determines whether the observation belongs to the true class, and the actual outcome (0 or 1) determines the probability of being in the true class.\n\nThe logistic regression algorithm works as follows:\n\n1. Calculate the log-odds ratios based on each input variable's estimated value and the predicted outcome for the observation. These log-odds ratios are used to calculate the probability of the observation's belonging to each category.\n\n2. Calculate the probability of the observation belonging to class 1 (or 0) given its input variables and predicted output using the formula: P(Y=1|X, O) = log(L/H), where L is the logistic likelihood function for class 1, H is the logistic likelihood function for class 0, and L is the logistic log-likelihood for class 1 and H is the logistic log-likelihood for class 0.\n\n3. Calculate the output (P(O=1|X)) using the formula: P(Y=1|X) = exp(logits).\n\nThe logistic regression algorithm works by finding the coefficients of each input variable that best fit the data, which are usually chosen by maximizing the likelihood function. The logistic regression output is then used to predict the probability of a specific observation belonging to each category.",
+        "seekTime": {
+          "end": 1044.4599999999998,
+          "id": 268,
+          "seek": 103086,
+          "start": 1042.4599999999998,
+          "text": " So for logistic regression,",
+          "video_name": "2023-10-04_KInt_default"
+        },
+        "source": "So that's what we want to have. So for logistic regression, there is a very concrete loss function that we always use. And this loss function is defined like this, and this is called the logistic loss. And so let's look at what this does. So our target class, Y, is either zero or it is one. If it's either zero or one, if it's zero, this means this part vanishes over here. If it's one, it means this part vanishes over here because this part, thing becomes zero. So it means either we have this part, or we have this part of the loss function. Depending on the value of Y. So if we say Y is equal to one, and this part over here vanishes, and it means we take, our loss function will be the logarithm of our prediction. So logarithm of our prediction. So what is if we get a large prediction? So how does the log of any function look like? So I haven't made a plot of this. Would have been nice if I had some internet connection right now. Hmm., So let's see if I can get. So, ah yeah, some plot of logarithm. So the"
+      }
+  
+      )
+      this.mic = true;
+    }
+     this.scrollToBottom();
   }
 
 

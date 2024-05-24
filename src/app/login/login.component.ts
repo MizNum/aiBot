@@ -18,14 +18,16 @@ import { count } from 'console';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit{
 
   constructor(
     private router: Router,
     private mailService: MailService,
     private popUpService: PopupService
   ) { }
-
+  ngOnInit(): void {
+      localStorage.setItem('session','false');
+  }
 
   email = '';
   code = '';
@@ -75,7 +77,7 @@ export class LoginComponent {
     console.log("Otp sent is ", this.otp, " and the recieved code is ", this.code);
     if (this.code === this.otp) {
       this.session = true;
-      // sessionStorage.setItem('session','true');
+      localStorage.setItem('session','true');
       this.router.navigate(['/home']);
     }
     else {
@@ -97,8 +99,8 @@ export class LoginComponent {
 
 
   onSingnUp() {
-    this.loginPage = !this.loginPage;
-    this.otpSent = false;
+    // this.loginPage = !this.loginPage;
+    // this.otpSent = false;
   }
 
 }
