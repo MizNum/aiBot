@@ -19,7 +19,7 @@ export class MailService {
       const response = await axios.post(apiUrl, data);
       const otp = response.data.Otp?.toString();
       this.popUpService.toast('OTP has been sent Successfully.','Dismiss');
-      console.log('OTP sent is ',otp);
+      // console.log('OTP sent is ',otp);
       return otp;
     } catch (error) {
       

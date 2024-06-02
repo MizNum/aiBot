@@ -1,19 +1,20 @@
 <div class="home">
   <div class="home-container">
     <div class="content">
-      <app-loader *ngIf="loading"></app-loader>
       <div class="content-head">
         <div class="head-title">
           <span class="title">Ai Bot</span>
           <span class="right-container">
-            <span class="lang-title">
-              Preferred Language
-            </span>
-            <span class="select-lang-class">
-              <select (change)="changeLanguage()"  [(ngModel)]="currentLanguage">  
-                <option [value]="'en'">English</option>
-                <option *ngFor="let language of languages" [value]="language.code">{{ language.name }}</option>
-              </select>
+            <span *ngIf="!loading" class="lang-container">
+              <span class="lang-title">
+                Preferred Language
+              </span>
+              <span class="select-lang-class">
+                <select (change)="changeLanguage()"  [(ngModel)]="currentLanguage">  
+                  <option [value]="'en'">English</option>
+                  <option *ngFor="let language of languages" [value]="language.code">{{ language.name }}</option>
+                </select>
+              </span>
             </span>
           </span>
         </div>
@@ -22,6 +23,7 @@
         </div>
       </div>
       <div class="content-chat-screen" #chatContainer>
+        <app-loader *ngIf="loading"></app-loader>
         <div class="chat" *ngFor="let data of conversation ">
           <ng-container *ngIf="data.type === 'text'">
             <span class="msg-user">{{ data.content }}

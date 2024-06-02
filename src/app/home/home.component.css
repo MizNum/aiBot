@@ -51,6 +51,15 @@
   border-radius: 4px;
   
 }
+.lang-container{
+  position:inherit;
+  display: flex;
+  flex-direction: column;
+  color: #005694;
+  border-radius: 4px;
+  z-index: 1;
+  
+}
 
 .lang-title{
 font-size: 0.8rem;

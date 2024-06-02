@@ -376,7 +376,7 @@ export class HomeComponent implements OnInit {
     this.recognition.onresult = (event: any) => {
       this.outputRef.nativeElement.value = event.results[0][0].transcript;
       this.textInput = event.results[0][0].transcript;
-      console.log(this.textInput);
+      // console.log(this.textInput);
     };
 
     this.recognition.onerror = (event: any) => {
@@ -421,12 +421,18 @@ export class HomeComponent implements OnInit {
 
   async changeLanguage(){
     this.preLanguage.push(this.currentLanguage);
-    console.log('Previous language is ',this.preLanguage[this.preLanguage.length-2]);
-    console.log('Language selected is ',this.currentLanguage);
+    // console.log('Previous language is ',this.preLanguage[this.preLanguage.length-2]);
+    // console.log('Language selected is ',this.currentLanguage);
     this.startLoading();
+    this.popUpService.toast('Conversation will be updated soon.')
     const response = await this.response.translate(this.conversation,this.currentLanguage);
-    if(response!==undefined)
+    if(response!==undefined){
     this.conversation = response;
+    this.popUpService.toast('Conversation has been updated.');
+  }
+  else{
+    this.popUpService.toast('Failed to update conversation language,please try again after sometime or restart.')
+  }
     this.stopLoading();
     
   }
